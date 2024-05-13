@@ -2,8 +2,10 @@ from flask import Flask, request, render_template
 import pandas as pd
 from geopy.distance import geodesic
 import requests
+import os
 
 app = Flask(__name__)
+weather_api_key = os.getenv('OPENWEATHERMAP_API_KEY')
 
 # Load the data
 data = pd.read_csv('KC_CFR_WLK_STRET_INFO_2021.csv', na_values='-')
@@ -27,7 +29,7 @@ def nearest_courses():
     over_10 = data[data['COURS_LT_CN'].isin(['10~15Km미만', '15~20Km미만', '20~100Km미만'])].nsmallest(1, 'Distance')
 
     # Get weather data
-    weather_info = requests.get(f"http://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid=c7b88b5ac1aee004ce338ccee52a0265&lang=kr&units=metric").json()
+    weather_info = requests.get(f"http://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid={weather_api_key}&lang=kr&units=metric").json()
     weather = str(weather_info['main']['feels_like'])+'°C의 체감 온도로 '+weather_info['weather'][0]['description']
     
     return render_template('results.html', under_5=under_5, between_5_and_10=between_5_and_10, over_10=over_10, weather=weather)
